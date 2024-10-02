@@ -4,6 +4,14 @@
 # Basic functions #
 ###################
 
+function auth_header_builder() {
+    if [[ "$AUTH_TOKEN" == "github_pat"* ]]; then
+        echo "Authorization: Bearer $AUTH_TOKEN"
+    else
+        echo "Authorization: Basic $AUTH_TOKEN"
+    fi
+}
+
 function die() {
     local rc=$1
     shift
@@ -92,8 +100,10 @@ function curl_github_api() {
     local url=$1
     shift
     local curl_opts=$@
+    local auth_header=$(auth_header_builder)
+
     curl --silent --request GET \
-        -H "Authorization: Basic $AUTH_TOKEN" \
+        -H "$auth_header" \
         -H "Accept: application/vnd.github.v3+json" \
         $url $curl_opts
 }
@@ -103,13 +113,14 @@ function trigger_workflow() {
     local workflow_branch=$2
     shift 2
     local workflow_inputs=$@
+    local auth_header=$(auth_header_builder)
 
     local curl_rc=$( \
         curl --silent \
              --request POST \
              --output /dev/stderr \
              --write-out "%{http_code}" \
-             -H "Authorization: Basic $AUTH_TOKEN" \
+             -H "$auth_header" \
              -H "Accept: application/vnd.github.v3+json" \
              $github_url --data "$workflow_inputs")
     
@@ -283,6 +294,7 @@ Mandatory Options:
 
     -a, --auth-token <token>            provide a Github authentication token in the format of username:token;
                                         $PROG would 'base64' it and pass it on in the request header;
+                                        you can also use a personal access token;
 
 Optional:
 
