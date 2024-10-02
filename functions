@@ -206,6 +206,7 @@ function wait_for_status() {
     until [[ -n $job_id ]]; do
         # Loop over all URLs and check for Job ID we triggered earlier;
         local all_job_urls=$(get_jobs_urls "$workflow_base_url/runs?created=>$(date_iso8601)")
+        echo -e "Found following Job URLs: \n$all_job_urls"
         for url in $all_job_urls ; do
             local job_id=$(curl_github_api $url | jq '.jobs[] | select(.steps[].name == "'"$artifact_uuid"'") | .id' 2> /dev/null)
             if [[ -n $job_id ]] ; then
