@@ -8,7 +8,7 @@ function auth_header_builder() {
     if [[ "$AUTH_TOKEN" == "github_pat"* ]]; then
         echo "Authorization: Bearer $AUTH_TOKEN"
     else
-        echo "Authorization: Basic $AUTH_TOKEN"
+        echo -e "Authorization: Basic $(echo -n $AUTH_TOKEN | base64)"
     fi
 }
 
